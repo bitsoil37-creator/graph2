@@ -121,28 +121,34 @@ async function buildGraph() {
   chart = new Chart(ctx, {
     type: "line",
     data: {
-      labels: days,
-      datasets: datasets
+        labels: days,
+        datasets: datasets
     },
     options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        x: {
-          title: { display: true, text: "Day of Month" },
-          grid: { display: true }
+        responsive: false,           // Disable responsive to fit 200x200
+        maintainAspectRatio: false,  // Important to respect container size
+        layout: {
+            padding: 5
         },
-        y: {
-          title: { display: true, text: "Values" },
-          beginAtZero: false,
-          grace: 10
+        scales: {
+            x: {
+                title: { display: true, text: "Day" },
+                grid: { display: true },
+                ticks: { font: { size: 8 } } // smaller labels
+            },
+            y: {
+                title: { display: true, text: "Values" },
+                beginAtZero: false,
+                grace: 5,
+                ticks: { font: { size: 8 } } // smaller labels
+            }
+        },
+        plugins: {
+            legend: {
+                position: "top",
+                labels: { font: { size: 8 } } // smaller legend
+            },
+            tooltip: { enabled: true, bodyFont: { size: 8 } }
         }
-      },
-      plugins: {
-        legend: { position: "top" }
-      }
     }
-  });
-}
-
-buildGraph();
+});
