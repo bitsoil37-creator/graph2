@@ -27,9 +27,6 @@ const colorMap = {
   salinity: "#5D4037"
 };
 
-// Vertical separation constant (adjust to make lines more separated)
-const verticalSeparation = 0.5;
-
 // --------------------
 // Fetch all nodes for selected user
 // --------------------
@@ -92,6 +89,18 @@ async function buildGraph() {
 
   // Create datasets
   const datasets = elements.map((el) => {
+    // Set different point sizes for EC and salinity
+    let pointRadius = 2; // Default size for other elements
+    let pointHoverRadius = 4; // Default hover size
+    
+    if (el === 'ec') {
+      pointRadius = 5; // Bigger points for EC
+      pointHoverRadius = 7;
+    } else if (el === 'salinity') {
+      pointRadius = 2; // Smaller points for salinity
+      pointHoverRadius = 4;
+    }
+
     return {
       label: el,
       data: days.map((day) => {
@@ -101,16 +110,15 @@ async function buildGraph() {
         // Average
         let avg = vals.reduce((a, b) => a + b, 0) / vals.length;
 
-        // Larger vertical separation
-        let offset = elements.indexOf(el) * verticalSeparation;
-
-        return avg + offset;
+        return avg;
       }),
       borderColor: colorMap[el] || "#000",
       backgroundColor: colorMap[el] || "#000",
       borderWidth: 2,
       tension: 0.3,
-      spanGaps: true
+      spanGaps: true,
+      pointRadius: pointRadius,
+      pointHoverRadius: pointHoverRadius
     };
   });
 
@@ -139,23 +147,7 @@ async function buildGraph() {
         }
       },
       plugins: {
-        legend: { position: "top" },
-        tooltip: {
-          mode: 'nearest',
-          intersect: false,
-          callbacks: {
-            title: function(tooltipItems) {
-              if (tooltipItems.length > 0) {
-                return `Day ${tooltipItems[0].label}`;
-              }
-              return '';
-            }
-          }
-        }
-      },
-      interaction: {
-        mode: 'nearest',
-        intersect: false
+        legend: { position: "top" }
       }
     }
   });
