@@ -107,10 +107,8 @@ async function buildGraph() {
         const vals = data[day]?.[el] || [];
         if (vals.length === 0) return null;
 
-        // Average
-        let avg = vals.reduce((a, b) => a + b, 0) / vals.length;
-
-        return avg;
+        // Average (no vertical separation)
+        return vals.reduce((a, b) => a + b, 0) / vals.length;
       }),
       borderColor: colorMap[el] || "#000",
       backgroundColor: colorMap[el] || "#000",
