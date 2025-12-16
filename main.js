@@ -139,12 +139,26 @@ async function buildGraph() {
         }
       },
       plugins: {
-        legend: { position: "top" }
+        legend: { position: "top" },
+        tooltip: {
+          mode: 'nearest',
+          intersect: false,
+          callbacks: {
+            title: function(tooltipItems) {
+              if (tooltipItems.length > 0) {
+                return `Day ${tooltipItems[0].label}`;
+              }
+              return '';
+            }
+          }
+        }
+      },
+      interaction: {
+        mode: 'nearest',
+        intersect: false
       }
     }
   });
 }
 
 buildGraph();
-
-
