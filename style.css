@@ -36,15 +36,3 @@ h1 {
     height: 100% !important;
 }
 
-/* Optional: Add media query for smaller screens */
-@media (max-width: 768px) {
-    body {
-        padding: 10px;
-    }
-    
-    .chart-container {
-        width: 95%;
-        height: 600px; /* Slightly smaller on mobile */
-        padding: 10px;
-    }
-}
