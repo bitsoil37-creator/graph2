@@ -78,105 +78,7 @@ async function processGraphData() {
 }
 
 // --------------------
-// Touch/Pinch Gesture Handling
-// --------------------
-let initialPinchDistance = 0;
-let isPinching = false;
-let lastTouchCenter = { x: 0, y: 0 };
-
-function setupTouchGestures(canvas) {
-  // Touch events for pinch-to-zoom
-  canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
-  canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
-  canvas.addEventListener('touchend', handleTouchEnd, { passive: false });
-  
-  // Double-tap to reset zoom
-  let lastTap = 0;
-  canvas.addEventListener('touchend', (e) => {
-    const currentTime = new Date().getTime();
-    const tapLength = currentTime - lastTap;
-    
-    if (tapLength < 300 && tapLength > 0 && e.touches.length === 0) {
-      // Double-tap detected
-      if (chart) {
-        chart.resetZoom();
-        chart.reset();
-      }
-      e.preventDefault();
-    }
-    lastTap = currentTime;
-  }, { passive: false });
-}
-
-function handleTouchStart(e) {
-  if (e.touches.length === 2 && chart) {
-    isPinching = true;
-    const touch1 = e.touches[0];
-    const touch2 = e.touches[1];
-    
-    initialPinchDistance = Math.hypot(
-      touch2.clientX - touch1.clientX,
-      touch2.clientY - touch1.clientY
-    );
-    
-    lastTouchCenter = {
-      x: (touch1.clientX + touch2.clientX) / 2,
-      y: (touch1.clientY + touch2.clientY) / 2
-    };
-    
-    e.preventDefault();
-  }
-}
-
-function handleTouchMove(e) {
-  if (e.touches.length === 2 && chart && isPinching) {
-    const touch1 = e.touches[0];
-    const touch2 = e.touches[1];
-    
-    const currentDistance = Math.hypot(
-      touch2.clientX - touch1.clientX,
-      touch2.clientY - touch1.clientY
-    );
-    
-    const centerX = (touch1.clientX + touch2.clientX) / 2;
-    const centerY = (touch1.clientY + touch2.clientY) / 2;
-    
-    if (initialPinchDistance > 0) {
-      const scaleFactor = currentDistance / initialPinchDistance;
-      
-      // Convert screen coordinates to chart coordinates
-      const chartArea = chart.chartArea;
-      const xScale = chart.scales.x;
-      const yScale = chart.scales.y;
-      
-      const xValue = xScale.getValueForPixel(centerX);
-      const yValue = yScale.getValueForPixel(centerY);
-      
-      // Apply zoom
-      chart.zoom({
-        x: scaleFactor,
-        y: scaleFactor
-      }, {
-        x: xValue,
-        y: yValue
-      });
-      
-      initialPinchDistance = currentDistance;
-    }
-    
-    e.preventDefault();
-  }
-}
-
-function handleTouchEnd(e) {
-  if (e.touches.length < 2) {
-    isPinching = false;
-    initialPinchDistance = 0;
-  }
-}
-
-// --------------------
-// Build Graph with Zoom/Pan
+// Build Graph (Simple version)
 // --------------------
 async function buildGraph() {
   const data = await processGraphData();
@@ -223,135 +125,43 @@ async function buildGraph() {
   const loading = document.querySelector('.loading');
   if (loading) loading.style.display = 'none';
 
-  // Check if zoom plugin is available
-  if (typeof Chart.Zoom === 'undefined') {
-    console.warn('Chart.js zoom plugin not loaded. Using native gestures only.');
-    initializeBasicChart();
-  } else {
-    initializeZoomChart();
-  }
-
-  function initializeBasicChart() {
-    chart = new Chart(ctx, {
-      type: "line",
-      data: {
-        labels: days,
-        datasets: datasets
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          x: {
-            title: { display: true, text: "Day of Month", font: { size: 14 } },
-            grid: { display: true }
-          },
-          y: {
-            title: { display: true, text: "Values", font: { size: 14 } },
-            beginAtZero: false,
-            grace: '10%'
-          }
+  chart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: days,
+      datasets: datasets
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: {
+          title: { display: true, text: "Day of Month", font: { size: 14 } },
+          grid: { display: true }
         },
-        plugins: {
-          legend: { 
-            position: "top",
-            labels: {
-              padding: 20,
-              font: {
-                size: 14
-              }
+        y: {
+          title: { display: true, text: "Values", font: { size: 14 } },
+          beginAtZero: false,
+          grace: '10%'
+        }
+      },
+      plugins: {
+        legend: { 
+          position: "top",
+          labels: {
+            padding: 20,
+            font: {
+              size: 14
             }
           }
-        },
-        interaction: {
-          intersect: false,
-          mode: 'index'
         }
+      },
+      interaction: {
+        intersect: false,
+        mode: 'index'
       }
-    });
-    
-    // Setup touch gestures
-    setupTouchGestures(ctx.canvas);
-    
-    // Double-click to reset (desktop)
-    ctx.canvas.addEventListener('dblclick', () => {
-      chart.reset();
-    });
-  }
-
-  function initializeZoomChart() {
-    chart = new Chart(ctx, {
-      type: "line",
-      data: {
-        labels: days,
-        datasets: datasets
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          x: {
-            title: { display: true, text: "Day of Month", font: { size: 14 } },
-            grid: { display: true }
-          },
-          y: {
-            title: { display: true, text: "Values", font: { size: 14 } },
-            beginAtZero: false,
-            grace: '10%'
-          }
-        },
-        plugins: {
-          legend: { 
-            position: "top",
-            labels: {
-              padding: 20,
-              font: {
-                size: 14
-              }
-            }
-          },
-          zoom: {
-            zoom: {
-              wheel: {
-                enabled: true,
-                speed: 0.1
-              },
-              pinch: {
-                enabled: true
-              },
-              mode: 'xy',
-              drag: {
-                enabled: false // We'll use pan for drag
-              }
-            },
-            pan: {
-              enabled: true,
-              mode: 'xy',
-              modifierKey: null,
-              threshold: 10
-            },
-            limits: {
-              x: { min: 'original', max: 'original' },
-              y: { min: 'original', max: 'original' }
-            }
-          }
-        },
-        interaction: {
-          intersect: false,
-          mode: 'index'
-        }
-      },
-      plugins: [Chart.Zoom]
-    });
-
-    // Double-click to reset zoom
-    ctx.canvas.addEventListener('dblclick', () => {
-      chart.resetZoom();
-    });
-
-    // Setup additional touch gestures for pinch-to-zoom
-    setupTouchGestures(ctx.canvas);
-  }
+    }
+  });
 }
 
 // Initialize the graph
