@@ -8,7 +8,7 @@ const elements = url.searchParams.get("elements")?.split(",").map(e => e.trim().
 
 // Firebase URL
 const firebaseBase =
-  "https://soilbitchina-default-rtdb.firebaseio.com/Users/" +
+  "https://finalcloud-c996e-default-rtdb.firebaseio.com/Users/" +
   user +
   "/Farm/Nodes";
 
